@@ -46,6 +46,7 @@ model Team {
   id        String   @id @default(uuid())
   teamName  String
   ownerId   String
+  teamImage String?
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

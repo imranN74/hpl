@@ -9,7 +9,7 @@ export default function Navbar(account: { account: any }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [seasonOpen, setSeasonOpen] = useState(false);
 
-  console.log(account, "acccccc.....");
+  // console.log(account, "acccccc.....");
 
   return (
     <header className="fixed top-0 left-0 w-full z-50 bg-[#071A2E]/90 backdrop-blur border-b border-white/10 text-white">
@@ -42,6 +42,12 @@ export default function Navbar(account: { account: any }) {
           <li>
             <Link href="/rules" className="hover:text-yellow-400 transition">
               Rules
+            </Link>
+          </li>
+
+          <li>
+            <Link href="/teams" className="hover:text-yellow-400 transition">
+              Teams
             </Link>
           </li>
 
@@ -133,6 +139,15 @@ export default function Navbar(account: { account: any }) {
                 Rules
               </Link>
             </li>
+            <li>
+              <Link
+                href="/teams"
+                onClick={() => setMobileOpen(false)}
+                className="block hover:text-yellow-400"
+              >
+                Teams
+              </Link>
+            </li>
 
             {/* MOBILE SEASONS */}
             <li>
@@ -161,6 +176,22 @@ export default function Navbar(account: { account: any }) {
                     Season 2
                   </Link>
                 </div>
+              )}
+            </li>
+            <li className=" hover:text-yellow-400">
+              {!account?.account?.isLoggedIn ? (
+                <Link href="/login" className="hover:text-yellow-400">
+                  Login
+                </Link>
+              ) : (
+                <form action={logoutAction}>
+                  <button
+                    type="submit"
+                    className="hover:text-red-400 transition cursor-pointer"
+                  >
+                    Logout
+                  </button>
+                </form>
               )}
             </li>
           </ul>
