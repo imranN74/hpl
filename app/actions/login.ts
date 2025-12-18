@@ -95,6 +95,7 @@ export async function loginAction(data: {
 
       const token = signJwt({
         id: owner.id,
+        ownerName: owner.ownerName,
         email: owner.ownerEmail,
         accountType: "OWNER",
         teamId,

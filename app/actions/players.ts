@@ -17,7 +17,7 @@ export interface PlayerInput {
 
 export async function playerRegistration(data: PlayerInput) {
   try {
-    console.log(data);
+    // console.log(data);
 
     if (
       !data.name ||
@@ -100,7 +100,7 @@ export async function getPlayersForOwner({
 }: {
   seasonId: string;
   tab: PlayerTab;
-  ownerTeamId: string;
+  ownerTeamId?: string;
   search?: string;
 }): Promise<GetPlayersResponse> {
   try {
@@ -234,5 +234,33 @@ export async function getPlayersForOwner({
       players: [],
       isAuctionOver: false,
     };
+  }
+}
+
+//______ASSIGN_TEAM TO PLAYERS_____________
+
+export async function assignPlayerToTeam({
+  playerId,
+  teamId,
+}: {
+  playerId: string;
+  teamId: string;
+}) {
+  if (!playerId || !teamId) {
+    return { success: false, message: "Invalid data" };
+  }
+
+  try {
+    await prisma.player.update({
+      where: { id: playerId },
+      data: {
+        teamId,
+      },
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Assign team error:", error);
+    return { success: false, message: "Failed to assign team" };
   }
 }

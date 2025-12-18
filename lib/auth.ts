@@ -15,6 +15,7 @@ export type CurrentAccount =
       isLoggedIn: true;
       accountType: "OWNER";
       owner: {
+        ownerName?: string;
         id: string;
         email: string;
         teamId: string;
@@ -49,6 +50,7 @@ export async function getCurrentAccount(): Promise<CurrentAccount> {
       isLoggedIn: true,
       accountType: "OWNER",
       owner: {
+        ownerName: payload.ownerName,
         id: payload.id,
         email: payload.email,
         teamId: payload.teamId!,

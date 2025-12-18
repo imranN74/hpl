@@ -5,6 +5,7 @@ const JWT_SECRET = process.env.JWT_SECRET!;
 export type JwtPayload = {
   id: string;
   email: string;
+  ownerName?: string;
   accountType: "USER" | "OWNER";
   role?: string;
   teamId?: string;

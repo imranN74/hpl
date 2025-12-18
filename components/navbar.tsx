@@ -2,7 +2,17 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ChevronDown, Menu, X, LogIn } from "lucide-react";
+import {
+  ChevronDown,
+  Menu,
+  X,
+  LogIn,
+  LogOut,
+  House,
+  SquareUser,
+  PencilLine,
+  Users,
+} from "lucide-react";
 import { logoutAction } from "@/app/actions/login";
 
 export default function Navbar(account: { account: any }) {
@@ -24,6 +34,19 @@ export default function Navbar(account: { account: any }) {
 
         {/* DESKTOP MENU */}
         <ul className="hidden md:flex items-center gap-8 font-medium cursor-pointer">
+          {!account?.account?.isLoggedIn ? (
+            ""
+          ) : (
+            <li>
+              <Link href="/" className="hover:text-yellow-400 transition">
+                Hey,&nbsp;
+                <span className="capitalize text-yellow-400 font-bold">
+                  {account?.account?.owner?.ownerName.split(" ")[0]}
+                </span>
+              </Link>
+            </li>
+          )}
+
           <li>
             <Link href="/" className="hover:text-yellow-400 transition">
               Home
@@ -51,8 +74,18 @@ export default function Navbar(account: { account: any }) {
             </Link>
           </li>
 
+          {!account?.account?.isLoggedIn ? (
+            ""
+          ) : (
+            <li>
+              <Link href="/owner" className="block hover:text-yellow-400">
+                Dashboard
+              </Link>
+            </li>
+          )}
+
           {/* SEASONS DROPDOWN */}
-          <li className="relative">
+          {/* <li className="relative">
             <button
               onClick={() => setSeasonOpen(!seasonOpen)}
               className="flex items-center gap-1 hover:text-yellow-400 transition"
@@ -78,19 +111,24 @@ export default function Navbar(account: { account: any }) {
                 </Link>
               </div>
             )}
-          </li>
+          </li> */}
           <li className=" hover:text-yellow-400">
             {!account?.account?.isLoggedIn ? (
-              <Link href="/login" className="hover:text-yellow-400">
+              <Link
+                href="/login"
+                className="hover:text-yellow-400 flex justify-center items-center gap-1"
+              >
+                <LogIn color="#c7d22d" size={20} />
                 Login
               </Link>
             ) : (
               <form action={logoutAction}>
                 <button
                   type="submit"
-                  className="hover:text-red-400 transition cursor-pointer"
+                  className="hover:text-red-400 transition cursor-pointer flex justify-center items-center gap-1"
                 >
                   Logout
+                  <LogOut color="#c7d22d" size={20} />
                 </button>
               </form>
             )}
@@ -110,6 +148,22 @@ export default function Navbar(account: { account: any }) {
       {mobileOpen && (
         <div className="md:hidden bg-[#071A2E] border-t border-white/10">
           <ul className="flex flex-col px-6 py-4 gap-4 font-medium">
+            {!account?.account?.isLoggedIn ? (
+              ""
+            ) : (
+              <li>
+                <Link
+                  href="/"
+                  onClick={() => setMobileOpen(false)}
+                  className="hover:text-yellow-400 transition"
+                >
+                  Welcome,&nbsp;
+                  <span className="capitalize text-yellow-400 font-bold">
+                    {account?.account?.owner?.ownerName.split(" ")[0]}
+                  </span>
+                </Link>
+              </li>
+            )}
             <li>
               <Link
                 href="/"
@@ -149,8 +203,22 @@ export default function Navbar(account: { account: any }) {
               </Link>
             </li>
 
+            {!account?.account?.isLoggedIn ? (
+              ""
+            ) : (
+              <li>
+                <Link
+                  href="/owner"
+                  onClick={() => setMobileOpen(false)}
+                  className="block hover:text-yellow-400"
+                >
+                  Dashboard
+                </Link>
+              </li>
+            )}
+
             {/* MOBILE SEASONS */}
-            <li>
+            {/* <li>
               <button
                 onClick={() => setSeasonOpen(!seasonOpen)}
                 className="flex items-center justify-between w-full hover:text-yellow-400"
@@ -177,19 +245,26 @@ export default function Navbar(account: { account: any }) {
                   </Link>
                 </div>
               )}
-            </li>
+            </li> */}
             <li className=" hover:text-yellow-400">
               {!account?.account?.isLoggedIn ? (
-                <Link href="/login" className="hover:text-yellow-400">
+                <Link
+                  href="/login"
+                  className="hover:text-yellow-400 flex justify-center items-center gap-1"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <LogIn color="#c7d22d" size={20} />
                   Login
                 </Link>
               ) : (
                 <form action={logoutAction}>
                   <button
                     type="submit"
-                    className="hover:text-red-400 transition cursor-pointer"
+                    // onClick={() => setMobileOpen(false)}
+                    className="hover:text-red-400 transition cursor-pointer flex justify-center items-center gap-1"
                   >
                     Logout
+                    <LogOut color="#c7d22d" size={20} />
                   </button>
                 </form>
               )}

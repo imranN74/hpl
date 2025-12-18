@@ -316,7 +316,7 @@ export default function HomePage() {
           </p>
 
           <div className="flex justify-center gap-6 text-gray-400">
-            {["About", "Teams", "Schedule", "Contact"].map((link) => (
+            {["About", "Teams", "Contact"].map((link) => (
               <Link
                 key={link}
                 href={`/${link.toLowerCase()}`}

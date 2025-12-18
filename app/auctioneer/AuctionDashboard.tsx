@@ -3,68 +3,89 @@
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, BadgeInfo } from "lucide-react";
+import { Search } from "lucide-react";
 import { getPlayersForOwner } from "../actions/players";
-import { PlayerDetailsModal } from "@/components/PlayerDetailModal";
+import { assignPlayerToTeam } from "../actions/players";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-export type Player = {
+/* ---------------------------------- */
+/* Types */
+/* ---------------------------------- */
+
+type Player = {
   id: string;
   name: string;
   phone: string;
-  role: string;
-  panchayat: string;
-  image?: string | null;
   teamId?: string | null;
 };
 
-type TabType = "ALL" | "UNSOLD" | "YOUR";
+type TabType = "ALL" | "UNSOLD";
 
-export default function OwnerDashboardClient({
+/* ---------------------------------- */
+/* TEMP TEAM LIST (replace IDs later) */
+/* ---------------------------------- */
+
+type Team = {
+  id: string;
+  teamName: string;
+  ownerId: string;
+  teamImage: string | null;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+/* ---------------------------------- */
+/* Page */
+/* ---------------------------------- */
+
+export default function AuctioneerDashboard({
   seasonId,
-  ownerTeamId,
   auctionDate,
+  team,
 }: {
   seasonId: string;
-  ownerTeamId: string;
   auctionDate: Date;
+  team: Team[];
 }) {
   const [activeTab, setActiveTab] = useState<TabType>("ALL");
   const [search, setSearch] = useState("");
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(false);
-  const [isAuctionOver, setIsAuctionOver] = useState(false);
-  const [noPlayersBought, setNoPlayersBought] = useState(false);
-  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
 
-  /* ---------- auction status ---------- */
-  useEffect(() => {
-    setIsAuctionOver(new Date() > new Date(auctionDate));
-  }, [auctionDate]);
+  const [selectedTeams, setSelectedTeams] = useState<Record<string, string>>(
+    {}
+  );
+  const [assigning, setAssigning] = useState<string | null>(null);
+
+  const isAuctionOver = new Date() > new Date(auctionDate);
 
   /* ---------- fetch players ---------- */
   useEffect(() => {
     async function fetchPlayers() {
       setLoading(true);
-      setPlayers([]);
-      setNoPlayersBought(false);
 
       const res = await getPlayersForOwner({
         seasonId,
-        tab: activeTab,
-        ownerTeamId,
+        tab: "ALL",
         search,
       });
 
       if (res.success) {
         setPlayers(res.players);
-        setNoPlayersBought(Boolean(res.noPlayersBought));
       }
 
       setLoading(false);
     }
 
     fetchPlayers();
-  }, [activeTab, search, seasonId, ownerTeamId]);
+  }, [activeTab, search, seasonId]);
 
   return (
     <div className="min-h-screen bg-linear-to-br from-[#071A2E] to-[#0b2c4d] p-1 md:p-6 text-white">
@@ -72,10 +93,10 @@ export default function OwnerDashboardClient({
         {/* HEADER */}
         <div className="px-2">
           <h1 className="text-3xl font-extrabold text-yellow-400">
-            Owner Dashboard
+            Auctioneer Dashboard
           </h1>
           <p className="text-sm text-white/70">
-            Player auction & team management
+            Assign players to teams during auction
           </p>
         </div>
 
@@ -96,37 +117,21 @@ export default function OwnerDashboardClient({
             >
               Unsold Players
             </TabButton>
-
-            <TabButton
-              active={activeTab === "YOUR"}
-              onClick={() => setActiveTab("YOUR")}
-            >
-              Your Players
-            </TabButton>
           </div>
 
-          <div className="relative w-full px-1 md:px-0 md:w-72">
+          <div className="relative w-full md:w-72">
             <Search
               className="absolute left-3 top-2.5 text-white/50"
               size={18}
             />
             <Input
-              placeholder="Search by player name..."
+              placeholder="Search player..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10 bg-[#071A2E]/70 border-white/10"
             />
           </div>
         </div>
-
-        {/* INFO STATES */}
-        {activeTab === "UNSOLD" && !isAuctionOver && (
-          <Info text="Auction is still ongoing. Unsold players will appear after auction ends." />
-        )}
-
-        {activeTab === "YOUR" && noPlayersBought && !loading && (
-          <Info text="No player bought yet." />
-        )}
 
         {/* TABLE */}
         <div className="overflow-x-auto rounded-xl border border-white/10 bg-[#071A2E]/70">
@@ -135,12 +140,8 @@ export default function OwnerDashboardClient({
               <tr>
                 <th className="px-4 py-3 text-left">Name</th>
                 <th className="px-4 py-3 text-left">Phone</th>
-
-                <th className="px-4 py-3 text-left">Role</th>
-                <th className="px-4 py-3 text-left hidden md:block">
-                  Panchayat
-                </th>
-                <th className="px-4 py-3 text-center">Info</th>
+                <th className="px-4 py-3 text-left">Assign Team</th>
+                <th className="px-4 py-3 text-center">Action</th>
               </tr>
             </thead>
 
@@ -148,7 +149,7 @@ export default function OwnerDashboardClient({
               {!loading && players.length === 0 && (
                 <tr>
                   <td
-                    colSpan={5}
+                    colSpan={4}
                     className="px-4 py-6 text-center text-white/60"
                   >
                     No players found
@@ -163,18 +164,65 @@ export default function OwnerDashboardClient({
                 >
                   <td className="px-4 py-3 font-medium capitalize">{p.name}</td>
                   <td className="px-4 py-3">{p.phone}</td>
-                  <td className="px-4 py-3 capitalize">{p.role}</td>
-                  <td className="px-4 py-3 hidden md:block capitalize">
-                    {p.panchayat}
-                  </td>
-                  <td className="px-4 py-3 text-center">
-                    <button
-                      title="info"
-                      className="cursor-pointer"
-                      onClick={() => setSelectedPlayer(p)}
+
+                  {/* TEAM SELECT */}
+                  <td className="px-4 py-3">
+                    <Select
+                      value={selectedTeams[p.id] || ""}
+                      onValueChange={(value) =>
+                        setSelectedTeams((prev) => ({
+                          ...prev,
+                          [p.id]: value,
+                        }))
+                      }
                     >
-                      <BadgeInfo color="#b3a232" />
-                    </button>
+                      <SelectTrigger
+                        className="
+        w-56
+        bg-[#071A2E]
+        border-white/20
+        text-white
+      "
+                      >
+                        <SelectValue placeholder="Select Team" />
+                      </SelectTrigger>
+
+                      <SelectContent className="bg-[#071A2E] border-white/20 text-white capitalize">
+                        {team.map((t) => (
+                          <SelectItem key={t.id} value={t.id}>
+                            {t.teamName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </td>
+
+                  {/* ASSIGN */}
+                  <td className="px-4 py-3 text-center">
+                    <Button
+                      size="sm"
+                      disabled={!selectedTeams[p.id] || assigning === p.id}
+                      onClick={async () => {
+                        setAssigning(p.id);
+
+                        const res = await assignPlayerToTeam({
+                          playerId: p.id,
+                          teamId: selectedTeams[p.id],
+                        });
+
+                        setAssigning(null);
+
+                        if (res.success) {
+                          setPlayers((prev) =>
+                            prev.filter((pl) => pl.id !== p.id)
+                          );
+                        } else {
+                          alert(res.message);
+                        }
+                      }}
+                    >
+                      {assigning === p.id ? "Assigning..." : "Assign"}
+                    </Button>
                   </td>
                 </tr>
               ))}
@@ -182,7 +230,7 @@ export default function OwnerDashboardClient({
               {loading && (
                 <tr>
                   <td
-                    colSpan={5}
+                    colSpan={4}
                     className="px-4 py-6 text-center text-white/50"
                   >
                     Loading players...
@@ -193,20 +241,14 @@ export default function OwnerDashboardClient({
           </table>
         </div>
       </div>
-
-      {/* PLAYER DETAILS MODAL */}
-      {selectedPlayer && (
-        <PlayerDetailsModal
-          player={selectedPlayer}
-          auctionDate={auctionDate}
-          onClose={() => setSelectedPlayer(null)}
-        />
-      )}
     </div>
   );
 }
 
-/* ---------- helpers ---------- */
+/* ---------------------------------- */
+/* Helpers */
+/* ---------------------------------- */
+
 function TabButton({
   active,
   children,
@@ -229,13 +271,5 @@ function TabButton({
     >
       {children}
     </Button>
-  );
-}
-
-function Info({ text }: { text: string }) {
-  return (
-    <div className="rounded-lg bg-yellow-400/10 border border-yellow-400/30 px-4 py-3 text-yellow-300 text-sm">
-      {text}
-    </div>
   );
 }
