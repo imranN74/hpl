@@ -7,7 +7,7 @@ export default function HomePage() {
     <main className="bg-linear-to-b from-[#071A2E] via-[#0A1929] to-[#071A2E] text-white overflow-hidden mt-15 md:mt-15">
       {/* HERO SECTION */}
       <section className="relative min-h-screen flex items-center justify-center px-6 text-center">
-        <div className="absolute inset-0 bg-[url('/cricket-stadium-night-lights.jpg')] bg-cover bg-center opacity-20" />
+        <div className="absolute inset-0" />
         <div className="absolute inset-0 bg-linear-to-b from-black/80 via-black/50 to-[#071A2E]" />
 
         <div className="absolute top-20 left-10 w-72 h-72 bg-yellow-400/20 rounded-full blur-3xl animate-pulse" />
@@ -265,7 +265,7 @@ export default function HomePage() {
       {/* CTA */}
       <section className="py-32 px-6 bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-400 text-black text-center relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 left-0 w-full h-full bg-[url('/cricket-ball-pattern.jpg')] bg-repeat" />
+          <div className="absolute top-0 left-0 w-full h-full" />
         </div>
 
         <div className="relative z-10 max-w-4xl mx-auto">
