@@ -147,6 +147,7 @@ export async function getPlayersForOwner({
           id: true,
           name: true,
           phone: true,
+          photoUrl: true,
           role: true,
           panchayat: true,
           teamId: true,
@@ -242,25 +243,100 @@ export async function getPlayersForOwner({
 export async function assignPlayerToTeam({
   playerId,
   teamId,
+  price,
 }: {
   playerId: string;
   teamId: string;
+  price: number;
 }) {
-  if (!playerId || !teamId) {
-    return { success: false, message: "Invalid data" };
-  }
-
   try {
+    if (!price || price <= 0) {
+      return {
+        success: false,
+        message: "Invalid player price",
+      };
+    }
+
     await prisma.player.update({
       where: { id: playerId },
       data: {
         teamId,
+        price: Number(price),
       },
     });
 
-    return { success: true };
+    return {
+      success: true,
+    };
   } catch (error) {
-    console.error("Assign team error:", error);
-    return { success: false, message: "Failed to assign team" };
+    console.error("assignPlayerToTeam error:", error);
+    return {
+      success: false,
+      message: "Failed to assign player",
+    };
+  }
+}
+
+//__PLAYERS FOR AUCTION___
+
+export type AuctionTab = "ALL" | "SOLD" | "UNSOLD";
+
+export async function getPlayersForAuction({
+  seasonId,
+  tab,
+  search,
+}: {
+  seasonId: string;
+  tab: AuctionTab;
+  search?: string;
+}) {
+  try {
+    const where: any = {
+      seasonId,
+      isActive: true,
+    };
+
+    /* -------- SEARCH -------- */
+    if (search?.trim()) {
+      where.name = {
+        contains: search.trim(),
+        mode: "insensitive",
+      };
+    }
+
+    /* -------- TAB CONDITIONS -------- */
+    if (tab === "SOLD") {
+      where.teamId = { not: null };
+    }
+
+    if (tab === "UNSOLD") {
+      where.teamId = null;
+    }
+
+    const players = await prisma.player.findMany({
+      where,
+      orderBy: { createdAt: "asc" },
+      select: {
+        id: true,
+        photoUrl: true,
+        name: true,
+        phone: true,
+        panchayat: true,
+        teamId: true,
+        role: true,
+      },
+    });
+
+    return {
+      success: true,
+      players,
+    };
+  } catch (error) {
+    console.error("getPlayersForAuction error:", error);
+    return {
+      success: false,
+      message: "Failed to fetch players",
+      players: [],
+    };
   }
 }

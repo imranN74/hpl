@@ -82,6 +82,7 @@ model Player {
   photoUrl      String?
   seasonId      String
   teamId        String?
+  price         Int?
   approved      Boolean  @default(false)
   termsAccepted Boolean  @default(false)
   createdAt     DateTime @default(now())

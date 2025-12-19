@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export default function HomePage() {
   return (
-    <main className="bg-linear-to-b from-[#071A2E] via-[#0A1929] to-[#071A2E] text-white overflow-hidden mt-15 md:mt-15">
+    <main className="bg-linear-to-b from-[#071A2E] via-[#0A1929] to-[#071A2E] text-white overflow-hidden mt-15">
       {/* HERO SECTION */}
       <section className="relative min-h-screen flex items-center justify-center px-6 text-center">
         <div className="absolute inset-0" />
@@ -14,21 +14,21 @@ export default function HomePage() {
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
 
         <div className="relative z-10 max-w-5xl">
-          <span className="inline-block bg-gradient-to-r from-yellow-400 to-yellow-500 text-black px-6 py-2 rounded-full text-sm font-bold mt-2 md:mt-0 mb-6 shadow-lg hover:scale-105 transition-transform duration-300">
+          <span className="inline-block bg-linear-to-r from-yellow-400 to-yellow-500 text-black px-6 py-2 rounded-full text-sm font-bold mt-2 md:mt-0 mb-6 shadow-lg hover:scale-105 transition-transform duration-300">
             Season 3 • Now Live
           </span>
 
-          <h1 className="text-6xl md:text-8xl font-extrabold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-500">
+          <h1 className="text-6xl md:text-8xl font-extrabold tracking-wider text-transparent bg-clip-text bg-linear-to-r from-yellow-400 via-yellow-300 to-yellow-500">
             HURLUNG
           </h1>
-          <h2 className="text-4xl md:text-6xl font-bold mt-4 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+          <h2 className="text-4xl md:text-6xl font-bold mt-4 bg-linear-to-r from-white to-gray-300 bg-clip-text text-transparent">
             PREMIER LEAGUE
           </h2>
 
           <p className="mt-8 text-xl md:text-2xl text-gray-200 leading-relaxed">
             Fast. Fierce. Fearless.
             <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-200 font-bold">
+            <span className="text-transparent bg-clip-text bg-linear-to-r from-yellow-400 to-yellow-200 font-bold">
               The Ultimate 6-Over Cricket League
             </span>
           </p>
@@ -36,10 +36,10 @@ export default function HomePage() {
           <div className="mt-12 flex flex-col sm:flex-row gap-6 justify-center">
             <Link
               href="/register"
-              className="group relative bg-gradient-to-r from-yellow-400 to-yellow-500 text-black px-10 py-5 rounded-2xl font-bold overflow-hidden shadow-2xl hover:shadow-yellow-400/50 transition-all duration-300 hover:scale-105"
+              className="group relative bg-linear-to-r from-yellow-400 to-yellow-500 text-black px-10 py-5 rounded-2xl font-bold overflow-hidden shadow-2xl hover:shadow-yellow-400/50 transition-all duration-300 hover:scale-105"
             >
               <span className="relative z-10">Player Registration</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-yellow-500 to-yellow-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute inset-0 bg-linear-to-r from-yellow-500 to-yellow-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </Link>
 
             <Link
@@ -49,7 +49,7 @@ export default function HomePage() {
               <span className="relative z-10 group-hover:text-black transition-colors duration-300">
                 View Teams
               </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-yellow-500 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+              <div className="absolute inset-0 bg-linear-to-r from-yellow-400 to-yellow-500 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
             </Link>
           </div>
 
@@ -77,14 +77,14 @@ export default function HomePage() {
         id="about"
         className="py-32 px-6 bg-linear-to-b from-[#071A2E] to-[#0B2C4D] relative overflow-hidden"
       >
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-yellow-400 to-transparent" />
+        <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-transparent via-yellow-400 to-transparent" />
 
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-200">
+            <h2 className="text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-linear-to-r from-yellow-400 to-yellow-200">
               About HPL
             </h2>
-            <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-yellow-500 mx-auto mt-4 rounded-full" />
+            <div className="w-24 h-1 bg-linear-to-r from-yellow-400 to-yellow-500 mx-auto mt-4 rounded-full" />
           </div>
 
           <div className="grid md:grid-cols-2 gap-16 items-center">
@@ -117,7 +117,7 @@ export default function HomePage() {
                     <div className="text-3xl mb-2 group-hover:scale-110 transition-transform duration-300">
                       {stat.icon}
                     </div>
-                    <p className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-200">
+                    <p className="text-4xl font-extrabold text-transparent bg-clip-text bg-linear-to-r from-yellow-400 to-yellow-200">
                       {stat.value}
                     </p>
                     <p className="text-sm text-gray-300 mt-2">{stat.label}</p>
@@ -128,7 +128,7 @@ export default function HomePage() {
 
             <div className="bg-linear-to-br from-[#071A2E] to-[#0A1929] rounded-3xl p-10 shadow-2xl border border-white/10 hover:border-yellow-400/30 transition-all duration-500 hover:scale-105">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-full flex items-center justify-center text-2xl">
+                <div className="w-12 h-12 bg-linear-to-r from-yellow-400 to-yellow-500 rounded-full flex items-center justify-center text-2xl">
                   ✨
                 </div>
                 <h3 className="text-3xl font-bold text-yellow-400">
@@ -165,10 +165,10 @@ export default function HomePage() {
         className="py-32 px-6 text-center bg-[#071A2E] relative"
       >
         <div>
-          <h2 className="text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-200">
+          <h2 className="text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-linear-to-r from-yellow-400 to-yellow-200">
             Tournament Format
           </h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-yellow-500 mx-auto mt-4 rounded-full" />
+          <div className="w-24 h-1 bg-linear-to-r from-yellow-400 to-yellow-500 mx-auto mt-4 rounded-full" />
           <p className="mt-6 text-gray-300 text-lg max-w-2xl mx-auto">
             Experience cricket like never before with our revolutionary format
           </p>
@@ -222,14 +222,14 @@ export default function HomePage() {
         <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-yellow-500/5 rounded-full blur-3xl" />
 
         <div className="relative z-10">
-          <div className="inline-block bg-gradient-to-r from-yellow-400 to-yellow-500 text-black px-6 py-2 rounded-full text-sm font-bold mb-8 animate-pulse">
+          <div className="inline-block bg-linear-to-r from-yellow-400 to-yellow-500 text-black px-6 py-2 rounded-full text-sm font-bold mb-8 animate-pulse">
             📢 Important Event
           </div>
 
-          <h2 className="text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-200">
+          <h2 className="text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-linear-to-r from-yellow-400 to-yellow-200">
             Auction Day
           </h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-yellow-500 mx-auto mt-4 rounded-full" />
+          <div className="w-24 h-1 bg-linear-to-r from-yellow-400 to-yellow-500 mx-auto mt-4 rounded-full" />
 
           <p className="mt-8 text-gray-200 text-lg max-w-3xl mx-auto leading-relaxed">
             Players will be auctioned live in front of team owners. Every bid
@@ -238,8 +238,8 @@ export default function HomePage() {
           </p>
 
           <div className="mt-14 inline-block relative group">
-            <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-3xl blur-xl opacity-75 group-hover:opacity-100 transition-opacity duration-300 animate-pulse" />
-            <div className="relative bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-400 text-black px-14 py-8 rounded-3xl font-extrabold text-2xl shadow-2xl group-hover:scale-105 transition-transform duration-300">
+            <div className="absolute inset-0 bg-linear-to-r from-yellow-400 to-yellow-500 rounded-3xl blur-xl opacity-75 group-hover:opacity-100 transition-opacity duration-300 animate-pulse" />
+            <div className="relative bg-linear-to-r from-yellow-400 via-yellow-500 to-yellow-400 text-black px-14 py-8 rounded-3xl font-extrabold text-2xl shadow-2xl group-hover:scale-105 transition-transform duration-300">
               💰 21 December 2025
             </div>
           </div>
@@ -263,7 +263,7 @@ export default function HomePage() {
       </section>
 
       {/* CTA */}
-      <section className="py-32 px-6 bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-400 text-black text-center relative overflow-hidden">
+      <section className="py-32 px-6 bg-linear-to-r from-yellow-400 via-yellow-500 to-yellow-400 text-black text-center relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 left-0 w-full h-full" />
         </div>
@@ -282,7 +282,7 @@ export default function HomePage() {
             className="group inline-block relative bg-black text-yellow-400 px-14 py-6 rounded-3xl font-extrabold text-lg overflow-hidden shadow-2xl hover:shadow-black/50 transition-all duration-300 hover:scale-105"
           >
             <span className="relative z-10">Register for HPL 2025</span>
-            <div className="absolute inset-0 bg-gradient-to-r from-gray-900 to-black translate-x-full group-hover:translate-x-0 transition-transform duration-500" />
+            <div className="absolute inset-0 bg-linear-to-r from-gray-900 to-black translate-x-full group-hover:translate-x-0 transition-transform duration-500" />
           </Link>
 
           <p className="mt-6 text-sm opacity-80">
@@ -304,10 +304,10 @@ export default function HomePage() {
 
       {/* FOOTER */}
       <footer className="py-16 bg-black text-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-t from-yellow-400/5 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-yellow-400/5 to-transparent" />
 
         <div className="relative z-10 max-w-4xl mx-auto px-6">
-          <div className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-200 mb-4">
+          <div className="text-4xl font-extrabold text-transparent bg-clip-text bg-linear-to-r from-yellow-400 to-yellow-200 mb-4">
             HURLUNG
           </div>
           <p className="text-gray-400 mb-6">© 2025 Hurlung Premier League</p>

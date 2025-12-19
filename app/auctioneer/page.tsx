@@ -31,7 +31,7 @@ export default async function AuctioneerPage() {
   return (
     <AuctioneerDashboard
       seasonId={season.id}
-      auctionDate={season.auctionDate}
+      // auctionDate={season.auctionDate}
       team={teams}
     />
   );

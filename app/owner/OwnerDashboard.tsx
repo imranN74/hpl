@@ -13,7 +13,7 @@ export type Player = {
   phone: string;
   role: string;
   panchayat: string;
-  image?: string | null;
+  photoUrl?: string | null;
   teamId?: string | null;
 };
 
@@ -133,6 +133,7 @@ export default function OwnerDashboardClient({
           <table className="min-w-full text-sm">
             <thead className="bg-[#0b2c4d] text-yellow-400">
               <tr>
+                <th className="px-2 py-3 text-left">Sn.</th>
                 <th className="px-4 py-3 text-left">Name</th>
                 <th className="px-4 py-3 text-left">Phone</th>
 
@@ -156,15 +157,18 @@ export default function OwnerDashboardClient({
                 </tr>
               )}
 
-              {players.map((p) => (
+              {players.map((p, index) => (
                 <tr
                   key={p.id}
                   className="border-t border-white/10 hover:bg-white/5"
                 >
-                  <td className="px-4 py-3 font-medium capitalize">{p.name}</td>
-                  <td className="px-4 py-3">{p.phone}</td>
-                  <td className="px-4 py-3 capitalize">{p.role}</td>
-                  <td className="px-4 py-3 hidden md:block capitalize">
+                  <td className="px-1 py-3 font-medium capitalize">
+                    {index + 1}
+                  </td>
+                  <td className="px-2 py-3 font-medium capitalize">{p.name}</td>
+                  <td className="px-2 py-3">{p.phone}</td>
+                  <td className="px-2 py-3 capitalize">{p.role}</td>
+                  <td className="px-2 py-3 hidden md:block capitalize">
                     {p.panchayat}
                   </td>
                   <td className="px-4 py-3 text-center">
