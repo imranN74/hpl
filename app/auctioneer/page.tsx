@@ -1,7 +1,20 @@
+import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import AuctioneerDashboard from "./AuctionDashboard";
+import { getCurrentAccount } from "@/lib/auth";
 
 export default async function AuctioneerPage() {
+  // 🔐 AUTH GUARD (same everywhere)
+  const account = await getCurrentAccount();
+
+  if (
+    !account?.isLoggedIn ||
+    account.accountType !== "USER" ||
+    account.user?.role !== "AUCTIONEER"
+  ) {
+    redirect("/login"); // or "/unauthorized"
+  }
+
   // 🔹 get current active season
   const season = await prisma.season.findFirst({
     where: { isActive: true },
@@ -17,8 +30,6 @@ export default async function AuctioneerPage() {
       createdAt: "asc",
     },
   });
-
-  //   console.log(teams, "..........");
 
   if (!season) {
     return (
