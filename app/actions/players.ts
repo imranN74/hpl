@@ -1,6 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
+import cloudinary from "@/lib/cloudinary";
 
 export interface PlayerInput {
   name: string;
@@ -15,48 +16,85 @@ export interface PlayerInput {
   seasonId: string;
 }
 
-export async function playerRegistration(data: PlayerInput) {
+export async function playerRegistration(formData: FormData) {
   try {
-    // console.log(data);
+    /* ===================== EXTRACT DATA ===================== */
+    const name = formData.get("name") as string;
+    const fatherName = formData.get("fatherName") as string;
+    const phone = formData.get("phone") as string;
+    const role = formData.get("role") as string;
+    const age = formData.get("age") as string;
+    const address = formData.get("address") as string;
+    const panchayat = formData.get("panchayat") as string;
+    const seasonId = formData.get("seasonId") as string;
 
+    const battingStyle = (formData.get("battingStyle") as string) || null;
+    const bowlingStyle = (formData.get("bowlingStyle") as string) || null;
+
+    const photo = formData.get("photo") as File;
+
+    /* ===================== VALIDATION ===================== */
     if (
-      !data.name ||
-      !data.fatherName ||
-      !data.phone ||
-      !data.role ||
-      !data.age ||
-      !data.address ||
-      !data.panchayat ||
-      !data.seasonId
+      !name ||
+      !fatherName ||
+      !phone ||
+      !role ||
+      !age ||
+      !address ||
+      !panchayat ||
+      !seasonId ||
+      !photo
     ) {
-      throw new Error("All required fields must be filled");
+      return { success: false, message: "All required fields must be filled" };
     }
 
-    // check duplicate player in same season
+    const ageNumber = parseInt(age);
+    if (isNaN(ageNumber)) {
+      return { success: false, message: "Invalid age" };
+    }
+
+    /* ===================== DUPLICATE CHECK ===================== */
     const existingPlayer = await prisma.player.findFirst({
       where: {
-        phone: data.phone,
-        seasonId: data.seasonId,
+        phone,
+        seasonId,
         isActive: true,
       },
     });
 
     if (existingPlayer) {
-      throw new Error("Player already registered for this season");
+      return {
+        success: false,
+        message: "Player already registered for this season",
+      };
     }
 
-    const player = await prisma.player.create({
+    /* ===================== CLOUDINARY UPLOAD ===================== */
+    const bytes = await photo.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+    const base64 = `data:${photo.type};base64,${buffer.toString("base64")}`;
+
+    const uploadResult = await cloudinary.uploader.upload(base64, {
+      folder: "hpl/players_image",
+      resource_type: "image",
+    });
+
+    /* ===================== DB SAVE ===================== */
+    await prisma.player.create({
       data: {
-        name: data.name,
-        fatherName: data.fatherName,
-        phone: data.phone,
-        age: Number(data.age),
-        role: data.role,
-        battingStyle: data.battingStyle || null,
-        bowlingStyle: data.bowlingStyle || null,
-        panchayat: data.panchayat,
-        address: data.address,
-        seasonId: data.seasonId,
+        name,
+        fatherName,
+        phone,
+        age: ageNumber,
+        role,
+        battingStyle,
+        bowlingStyle,
+        panchayat,
+        address,
+        photoUrl: uploadResult.secure_url,
+        season: {
+          connect: { id: seasonId },
+        },
       },
     });
 
@@ -65,11 +103,11 @@ export async function playerRegistration(data: PlayerInput) {
       message: "Player registered successfully",
     };
   } catch (error: any) {
-    console.error(error);
+    console.error("playerRegistration error:", error);
 
     return {
       success: false,
-      message: error.message || "Something went wrong",
+      message: "Registration failed",
     };
   }
 }
@@ -337,6 +375,96 @@ export async function getPlayersForAuction({
       success: false,
       message: "Failed to fetch players",
       players: [],
+    };
+  }
+}
+
+//__UPDATE  IMAGE____________
+
+export async function updatePlayerPhoto(formData: FormData) {
+  try {
+    const photo = formData.get("photo") as File;
+    const playerId = formData.get("playerId") as string;
+
+    if (!photo || !playerId) {
+      return { success: false, message: "Photo and player ID required" };
+    }
+
+    // Upload to Cloudinary
+    const bytes = await photo.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+    const base64 = `data:${photo.type};base64,${buffer.toString("base64")}`;
+
+    const uploadResult = await cloudinary.uploader.upload(base64, {
+      folder: "hpl/players_image",
+      resource_type: "image",
+    });
+
+    // Update player in database
+    await prisma.player.update({
+      where: { id: playerId },
+      data: {
+        photoUrl: uploadResult.secure_url,
+      },
+    });
+
+    return {
+      success: true,
+      message: "Photo updated successfully",
+      photoUrl: uploadResult.secure_url,
+    };
+  } catch (error) {
+    console.error("updatePlayerPhoto error:", error);
+    return {
+      success: false,
+      message: "Failed to update photo",
+    };
+  }
+}
+
+//______UPDATE PHONE____________
+
+export async function updatePlayerPhone({
+  playerId,
+  phone,
+}: {
+  playerId: string;
+  phone: string;
+}) {
+  try {
+    if (!playerId || !phone || phone.length !== 10) {
+      return { success: false, message: "Invalid phone number" };
+    }
+
+    // Check if phone already exists for another player
+    const existingPlayer = await prisma.player.findFirst({
+      where: {
+        phone,
+        id: { not: playerId },
+      },
+    });
+
+    if (existingPlayer) {
+      return {
+        success: false,
+        message: "Phone number already registered to another player",
+      };
+    }
+
+    await prisma.player.update({
+      where: { id: playerId },
+      data: { phone },
+    });
+
+    return {
+      success: true,
+      message: "Phone number updated successfully",
+    };
+  } catch (error) {
+    console.error("updatePlayerPhone error:", error);
+    return {
+      success: false,
+      message: "Failed to update phone number",
     };
   }
 }

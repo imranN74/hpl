@@ -17,14 +17,19 @@ import {
 } from "@/components/ui/select";
 import toast from "react-hot-toast";
 import { playerRegistration } from "../actions/players";
-import { PlayerInput } from "../actions/players";
 
 export default function PlayerRegistrationPage(seasonData: any) {
-  //   console.log(seasonData);
   const [preview, setPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  console.log(seasonData);
+
+  // State for Select components
+  const [role, setRole] = useState("");
+  const [battingStyle, setBattingStyle] = useState("");
+  const [bowlingStyle, setBowlingStyle] = useState("");
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -35,36 +40,33 @@ export default function PlayerRegistrationPage(seasonData: any) {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.currentTarget;
+
     try {
       if (!acceptedTerms) {
-        toast.error("Please accespt Terms & Conditions.");
+        toast.error("Please accept Terms & Conditions.");
         return;
       }
       setLoading(true);
 
       const formData = new FormData(form);
-      // const data = Object.fromEntries(formData.entries());
-      // console.log(data);
+      formData.append("seasonId", seasonData?.seasonData?.id);
 
-      const payload: PlayerInput = {
-        name: formData.get("name") as string,
-        fatherName: formData.get("fatherName") as string,
-        phone: formData.get("phone") as string,
-        role: formData.get("role") as string,
-        age: formData.get("age") as string,
-        address: formData.get("address") as string,
-        panchayat: formData.get("panchayat") as string,
-        seasonId: formData.get("seasonId") as string,
+      // Get the image file and append it
+      const imageFile = fileRef.current?.files?.[0];
+      if (imageFile) {
+        formData.set("photo", imageFile);
+      }
 
-        battingStyle: (formData.get("battingStyle") as string) || undefined,
-        bowlingStyle: (formData.get("bowlingStyle") as string) || undefined,
-      };
+      const response = await playerRegistration(formData);
 
-      const response = await playerRegistration(payload);
       if (response?.success) {
         toast.success(response.message);
         form.reset();
         setPreview(null);
+        setRole("");
+        setBattingStyle("");
+        setBowlingStyle("");
+        setAcceptedTerms(false);
       } else {
         toast.error(response.message);
       }
@@ -173,7 +175,8 @@ export default function PlayerRegistrationPage(seasonData: any) {
               {/* Player Role */}
               <div className="space-y-1.5 w-full">
                 <Label>Player Role</Label>
-                <Select name="role" required>
+                <input type="hidden" name="role" value={role} required />
+                <Select value={role} onValueChange={setRole} required>
                   <SelectTrigger className="h-12 text-base w-full">
                     <SelectValue placeholder="Select role" />
                   </SelectTrigger>
@@ -191,7 +194,8 @@ export default function PlayerRegistrationPage(seasonData: any) {
               {/* Batting Style */}
               <div className="space-y-1.5 w-full">
                 <Label>Batting Style</Label>
-                <Select name="battingStyle">
+                <input type="hidden" name="battingStyle" value={battingStyle} />
+                <Select value={battingStyle} onValueChange={setBattingStyle}>
                   <SelectTrigger className="h-12 text-base w-full">
                     <SelectValue placeholder="Batting style" />
                   </SelectTrigger>
@@ -205,7 +209,8 @@ export default function PlayerRegistrationPage(seasonData: any) {
               {/* Bowling Style */}
               <div className="space-y-1.5 w-full">
                 <Label>Bowling Style</Label>
-                <Select name="bowlingStyle">
+                <input type="hidden" name="bowlingStyle" value={bowlingStyle} />
+                <Select value={bowlingStyle} onValueChange={setBowlingStyle}>
                   <SelectTrigger className="h-12 text-base w-full">
                     <SelectValue placeholder="Bowling style" />
                   </SelectTrigger>

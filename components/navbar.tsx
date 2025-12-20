@@ -79,7 +79,7 @@ export default function Navbar(account: { account: any }) {
           ) : (
             <li>
               <Link href="/owner" className="block hover:text-yellow-400">
-                Dashboard
+                Players List
               </Link>
             </li>
           )}
@@ -212,7 +212,7 @@ export default function Navbar(account: { account: any }) {
                   onClick={() => setMobileOpen(false)}
                   className="block hover:text-yellow-400"
                 >
-                  Dashboard
+                  Players List
                 </Link>
               </li>
             )}

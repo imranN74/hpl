@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { Player } from "@/app/owner/OwnerDashboard";
 import { Button } from "./ui/button";
-import { success } from "zod";
+import { updatePlayerPhoto, updatePlayerPhone } from "@/app/actions/players";
+import toast from "react-hot-toast";
 
 export function PlayerDetailsModal({
   player,
@@ -16,9 +17,126 @@ export function PlayerDetailsModal({
 }) {
   const isAuctionOver = new Date() > new Date(auctionDate);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [currentPhotoUrl, setCurrentPhotoUrl] = useState(player.photoUrl);
+  const [currentPhone, setCurrentPhone] = useState(player.phone);
+  const [isEditingPhone, setIsEditingPhone] = useState(false);
+  const [phoneInput, setPhoneInput] = useState(player.phone);
+  const [updatingPhone, setUpdatingPhone] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageClick = () => {
+    if (uploading) return;
+    fileInputRef.current?.click();
+  };
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setUploading(true);
+
+      const formData = new FormData();
+      formData.append("photo", file);
+      formData.append("playerId", player.id);
+
+      const result = await updatePlayerPhoto(formData);
+
+      if (result.success) {
+        setCurrentPhotoUrl(result.photoUrl!);
+        toast.success("Photo updated successfully!");
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to update photo");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handlePhoneUpdate = async () => {
+    if (!phoneInput || phoneInput.length !== 10) {
+      toast.error("Please enter a valid 10-digit phone number");
+      return;
+    }
+
+    try {
+      setUpdatingPhone(true);
+
+      const result = await updatePlayerPhone({
+        playerId: player.id,
+        phone: phoneInput,
+      });
+
+      if (result.success) {
+        setCurrentPhone(phoneInput);
+        setIsEditingPhone(false);
+        toast.success("Phone number updated successfully!");
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to update phone number");
+    } finally {
+      setUpdatingPhone(false);
+    }
+  };
+
+  const handleCancelPhoneEdit = () => {
+    setPhoneInput(currentPhone);
+    setIsEditingPhone(false);
+  };
 
   return (
     <>
+      {/* Hidden file input */}
+      <input
+        title="player image"
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleImageChange}
+      />
+
+      {/* FULL SCREEN LOADER */}
+      {uploading && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/90 backdrop-blur-md">
+          <div className="text-center">
+            <div className="relative">
+              {/* Spinning ring */}
+              <div className="w-24 h-24 border-8 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin mx-auto"></div>
+
+              {/* Center icon */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <svg
+                  className="w-10 h-10 text-cyan-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  />
+                </svg>
+              </div>
+            </div>
+
+            <p className="text-white text-lg font-semibold mt-6">
+              Uploading Image...
+            </p>
+            <p className="text-cyan-400/80 text-sm mt-2">Please wait</p>
+          </div>
+        </div>
+      )}
+
       {/* MAIN MODAL */}
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
         <div className="w-full max-w-lg rounded-2xl bg-linear-to-br from-slate-900 via-slate-800 to-slate-900 border border-cyan-500/20 shadow-2xl shadow-cyan-500/10 text-white relative overflow-hidden">
@@ -35,24 +153,58 @@ export function PlayerDetailsModal({
           <div className="relative p-6">
             {/* AVATAR */}
             <div className="flex flex-col items-center gap-4 pb-6 border-b border-white/10">
-              <div
-                className="relative cursor-pointer"
-                onClick={() => player.photoUrl && setPreviewOpen(true)}
-              >
-                <div className="h-32 w-32 rounded-full border-4 border-gradient-to-r from-cyan-400 to-purple-400 overflow-hidden bg-gradient-to-br from-cyan-900/50 to-purple-900/50 flex items-center justify-center shadow-lg shadow-cyan-500/20 transition-transform duration-300 hover:scale-105">
-                  {player.photoUrl ? (
-                    <img
-                      src={player.photoUrl}
-                      alt={player.name}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-5xl font-bold bg-linear-to-br from-cyan-400 to-purple-400 bg-clip-text text-transparent">
-                      {player.name.charAt(0)}
-                    </span>
-                  )}
+              <div className="relative">
+                <div
+                  className={`relative ${
+                    !uploading ? "cursor-pointer" : "cursor-not-allowed"
+                  } group`}
+                  onClick={handleImageClick}
+                >
+                  <div className="h-32 w-32 rounded-full border-4 border-gradient-to-r from-cyan-400 to-purple-400 overflow-hidden bg-gradient-to-br from-cyan-900/50 to-purple-900/50 flex items-center justify-center shadow-lg shadow-cyan-500/20 transition-transform duration-300 group-hover:scale-105">
+                    {currentPhotoUrl ? (
+                      <img
+                        src={currentPhotoUrl}
+                        alt={player.name}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-5xl font-bold bg-linear-to-br from-cyan-400 to-purple-400 bg-clip-text text-transparent">
+                        {player.name.charAt(0)}
+                      </span>
+                    )}
+
+                    {/* Upload overlay */}
+                    {!uploading && (
+                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                        <svg
+                          className="w-8 h-8 text-white"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                          />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                          />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                  <div className="absolute inset-0 rounded-full border-2 border-cyan-400/20 animate-pulse" />
                 </div>
-                <div className="absolute inset-0 rounded-full border-2 border-cyan-400/20 animate-pulse" />
+
+                {/* Click to update hint */}
+                <p className="text-xs text-center text-cyan-400/60 mt-2">
+                  Click to update photo
+                </p>
               </div>
 
               <div className="text-center">
@@ -91,33 +243,88 @@ export function PlayerDetailsModal({
                       />
                     </svg>
                   </div>
+
                   <div className="flex-1">
                     <p className="text-xs text-white/50 uppercase tracking-wider font-medium">
                       Phone Number
                     </p>
-                    <p className="text-base text-white font-semibold mt-0.5">
-                      {player.phone}
-                    </p>
+
+                    {isEditingPhone ? (
+                      <div className="flex items-center gap-2 mt-1">
+                        <input
+                          type="text"
+                          maxLength={10}
+                          value={phoneInput}
+                          onChange={(e) =>
+                            setPhoneInput(e.target.value.replace(/\D/g, ""))
+                          }
+                          className="bg-white/10 text-white px-3 py-1.5 rounded-lg border border-cyan-500/30 focus:border-cyan-500 focus:outline-none text-sm flex-1"
+                          placeholder="10-digit number"
+                        />
+                        <button
+                          onClick={handlePhoneUpdate}
+                          disabled={updatingPhone}
+                          className="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
+                        >
+                          {updatingPhone ? "..." : "✓"}
+                        </button>
+                        <button
+                          onClick={handleCancelPhoneEdit}
+                          className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <p className="text-base text-white font-semibold">
+                          {currentPhone}
+                        </p>
+                        <button
+                          title="phoneEdit"
+                          onClick={() => setIsEditingPhone(true)}
+                          className="text-cyan-400 hover:text-cyan-300 text-xs"
+                        >
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    )}
                   </div>
-                  <div className="flex justify-center">
-                    <button
-                      className="
-      relative
-      px-6 py-3
-      rounded-xl
-      font-semibold
-      text-white
-      bg-linear-to-r from-green-500 to-emerald-500
-      shadow-lg shadow-green-500/40
-      transition-all duration-300
-      hover:scale-105
-      hover:shadow-green-500/70
-      focus:outline-none
-    "
-                    >
-                      📞 Call
-                    </button>
-                  </div>
+
+                  {!isEditingPhone && (
+                    <div className="flex justify-center">
+                      <a
+                        href={`tel:${currentPhone}`}
+                        className="
+                          relative
+                          px-6 py-3
+                          rounded-xl
+                          font-semibold
+                          text-white
+                          bg-linear-to-r from-green-500 to-emerald-500
+                          shadow-lg shadow-green-500/40
+                          transition-all duration-300
+                          hover:scale-105
+                          hover:shadow-green-500/70
+                          focus:outline-none
+                        "
+                      >
+                        📞 Call
+                      </a>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -188,7 +395,7 @@ export function PlayerDetailsModal({
             </button>
 
             <img
-              src={player.photoUrl || "/avtar-placeholder.png"}
+              src={currentPhotoUrl || "/avtar-placeholder.png"}
               alt={player.name}
               className="w-full max-h-[80vh] object-contain rounded-xl border border-white/20 shadow-2xl"
             />
