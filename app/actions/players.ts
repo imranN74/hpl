@@ -336,10 +336,26 @@ export async function getPlayersForAuction({
 
     /* -------- SEARCH -------- */
     if (search?.trim()) {
-      where.name = {
-        contains: search.trim(),
-        mode: "insensitive",
-      };
+      where.OR = [
+        {
+          name: {
+            contains: search.trim(),
+            mode: "insensitive",
+          },
+        },
+        {
+          phone: {
+            contains: search.trim(),
+            mode: "insensitive",
+          },
+        },
+        {
+          panchayat: {
+            contains: search.trim(),
+            mode: "insensitive",
+          },
+        },
+      ];
     }
 
     /* -------- TAB CONDITIONS -------- */
@@ -362,6 +378,7 @@ export async function getPlayersForAuction({
         panchayat: true,
         teamId: true,
         role: true,
+        price: true,
       },
     });
 
@@ -465,6 +482,103 @@ export async function updatePlayerPhone({
     return {
       success: false,
       message: "Failed to update phone number",
+    };
+  }
+}
+
+//___UPDATE ROLE____________
+
+export async function updatePlayerRole({
+  playerId,
+  role,
+}: {
+  playerId: string;
+  role: string;
+}) {
+  try {
+    const validRoles = ["batsman", "bowler", "all-rounder", "wicket-keeper"];
+
+    if (!playerId || !role || !validRoles.includes(role.toLowerCase())) {
+      return { success: false, message: "Invalid role selected" };
+    }
+
+    await prisma.player.update({
+      where: { id: playerId },
+      data: { role: role.toLowerCase() },
+    });
+
+    return {
+      success: true,
+      message: "Role updated successfully",
+      role: role.toLowerCase(),
+    };
+  } catch (error) {
+    console.error("updatePlayerRole error:", error);
+    return {
+      success: false,
+      message: "Failed to update role",
+    };
+  }
+}
+
+//___SOLD PLAYER UPDATE_________
+
+export async function updateSoldPlayer({
+  playerId,
+  teamId,
+  price,
+}: {
+  playerId: string;
+  teamId: string;
+  price: number;
+}) {
+  try {
+    if (!playerId || !teamId || !price || price <= 0) {
+      return {
+        success: false,
+        message: "Invalid input. Please provide valid player, team, and price.",
+      };
+    }
+
+    const existingPlayer = await prisma.player.findUnique({
+      where: { id: playerId },
+    });
+
+    if (!existingPlayer) {
+      return {
+        success: false,
+        message: "Player not found",
+      };
+    }
+
+    const teamExists = await prisma.team.findUnique({
+      where: { id: teamId },
+    });
+
+    if (!teamExists) {
+      return {
+        success: false,
+        message: "Team not found",
+      };
+    }
+
+    await prisma.player.update({
+      where: { id: playerId },
+      data: {
+        teamId,
+        price,
+      },
+    });
+
+    return {
+      success: true,
+      message: "Player updated successfully",
+    };
+  } catch (error) {
+    console.error("updateSoldPlayer error:", error);
+    return {
+      success: false,
+      message: "Failed to update player",
     };
   }
 }

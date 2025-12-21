@@ -3,8 +3,12 @@
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
-import { getPlayersForAuction, assignPlayerToTeam } from "../actions/players";
+import { Search, Edit2 } from "lucide-react";
+import {
+  getPlayersForAuction,
+  assignPlayerToTeam,
+  updateSoldPlayer,
+} from "../actions/players";
 import { PlayerDetailsModal } from "../../components/PlayerDetailModal";
 import {
   Select,
@@ -13,10 +17,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-/* ---------------------------------- */
-/* Types */
-/* ---------------------------------- */
 
 type Player = {
   id: string;
@@ -36,10 +36,6 @@ type Team = {
   teamName: string;
 };
 
-/* ---------------------------------- */
-/* Page */
-/* ---------------------------------- */
-
 export default function AuctioneerDashboard({
   seasonId,
   team,
@@ -58,16 +54,19 @@ export default function AuctioneerDashboard({
   const [playerPrices, setPlayerPrices] = useState<Record<string, number>>({});
   const [assigning, setAssigning] = useState<string | null>(null);
 
+  const [editingPlayer, setEditingPlayer] = useState<string | null>(null);
+  const [editTeam, setEditTeam] = useState<Record<string, string>>({});
+  const [editPrice, setEditPrice] = useState<Record<string, number>>({});
+
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
 
-  /* ---------- FETCH PLAYERS ---------- */
   useEffect(() => {
     async function fetchPlayers() {
       setLoading(true);
 
       const res = await getPlayersForAuction({
         seasonId,
-        tab: activeTab, // ALL = UNSOLD, SOLD = SOLD
+        tab: activeTab,
         search,
       });
 
@@ -81,11 +80,57 @@ export default function AuctioneerDashboard({
     fetchPlayers();
   }, [activeTab, search, seasonId]);
 
+  const handleStartEdit = (player: Player) => {
+    setEditingPlayer(player.id);
+    setEditTeam({ [player.id]: player.teamId || "" });
+    setEditPrice({ [player.id]: player.price || 0 });
+  };
+
+  const handleCancelEdit = (playerId: string) => {
+    setEditingPlayer(null);
+    setEditTeam((prev) => {
+      const { [playerId]: _, ...rest } = prev;
+      return rest;
+    });
+    setEditPrice((prev) => {
+      const { [playerId]: _, ...rest } = prev;
+      return rest;
+    });
+  };
+
+  const handleSaveEdit = async (player: Player) => {
+    setAssigning(player.id);
+
+    const res = await updateSoldPlayer({
+      playerId: player.id,
+      teamId: editTeam[player.id],
+      price: editPrice[player.id],
+    });
+
+    setAssigning(null);
+
+    if (res.success) {
+      setPlayers((prev) =>
+        prev.map((p) =>
+          p.id === player.id
+            ? {
+                ...p,
+                teamId: editTeam[player.id],
+                price: editPrice[player.id],
+              }
+            : p
+        )
+      );
+      setEditingPlayer(null);
+    } else {
+      alert(res.message);
+    }
+  };
+
   return (
     <>
       <div className="min-h-screen bg-linear-to-br from-[#071A2E] to-[#0b2c4d] p-4 text-white">
         <div className="max-w-7xl mx-auto space-y-6 mt-16">
-          {/* HEADER */}
           <div>
             <h1 className="text-3xl font-extrabold text-yellow-400">
               Auctioneer Dashboard
@@ -95,7 +140,6 @@ export default function AuctioneerDashboard({
             </p>
           </div>
 
-          {/* CONTROLS */}
           <div className="flex flex-col md:flex-row gap-4 justify-between">
             <div className="flex gap-2 bg-[#071A2E]/70 p-1 rounded-xl">
               <TabButton
@@ -127,7 +171,6 @@ export default function AuctioneerDashboard({
             </div>
           </div>
 
-          {/* TABLE */}
           <div className="overflow-x-auto rounded-xl border border-white/10 bg-[#071A2E]/70">
             <table className="min-w-full text-sm">
               <thead className="bg-[#0b2c4d] text-yellow-400">
@@ -146,8 +189,10 @@ export default function AuctioneerDashboard({
 
                   {activeTab === "SOLD" && (
                     <>
-                      <th className="px-3 py-3">Price</th>
+                      <th className="px-3 py-3">Price (₹)</th>
+                      <th className="px-3 py-3">Team</th>
                       <th className="px-3 py-3">Status</th>
+                      <th className="px-3 py-3">Action</th>
                     </>
                   )}
                 </tr>
@@ -157,7 +202,7 @@ export default function AuctioneerDashboard({
                 {!loading && players.length === 0 && (
                   <tr>
                     <td
-                      colSpan={6}
+                      colSpan={7}
                       className="px-4 py-6 text-center text-white/60"
                     >
                       No players found
@@ -168,14 +213,15 @@ export default function AuctioneerDashboard({
                 {players.map((p, index) => (
                   <tr
                     key={p.id}
-                    onClick={() => setSelectedPlayer(p)}
+                    onClick={() =>
+                      editingPlayer !== p.id && setSelectedPlayer(p)
+                    }
                     className="border-t border-white/10 hover:bg-white/5 cursor-pointer"
                   >
                     <td className="px-3 py-3">{index + 1}</td>
                     <td className="px-3 py-3 capitalize">{p.name}</td>
                     <td className="px-3 py-3">{p.phone}</td>
 
-                    {/* UNSOLD */}
                     {activeTab === "ALL" && (
                       <>
                         <td className="px-3 py-3">
@@ -207,12 +253,12 @@ export default function AuctioneerDashboard({
                           >
                             <SelectTrigger
                               onClick={(e) => e.stopPropagation()}
-                              className="w-48 bg-[#071A2E] border-white/20"
+                              className="w-48 bg-[#071A2E] border-white/20 "
                             >
                               <SelectValue placeholder="Select Team" />
                             </SelectTrigger>
 
-                            <SelectContent className="bg-[#071A2E] border-white/20 text-white">
+                            <SelectContent className="bg-[#071A2E] border-white/20 text-white capitalize">
                               {team.map((t) => (
                                 <SelectItem key={t.id} value={t.id}>
                                   {t.teamName}
@@ -257,14 +303,112 @@ export default function AuctioneerDashboard({
                       </>
                     )}
 
-                    {/* SOLD */}
                     {activeTab === "SOLD" && (
                       <>
-                        <td className="px-3 py-3 text-yellow-400 font-semibold">
-                          ₹{p.price ?? "-"}
+                        <td className="px-3 py-3">
+                          {editingPlayer === p.id ? (
+                            <Input
+                              onClick={(e) => e.stopPropagation()}
+                              type="number"
+                              min={1}
+                              placeholder="Amount"
+                              className="w-28 bg-[#071A2E] border-white/20"
+                              value={editPrice[p.id] || ""}
+                              onChange={(e) =>
+                                setEditPrice((prev) => ({
+                                  ...prev,
+                                  [p.id]: Number(e.target.value),
+                                }))
+                              }
+                            />
+                          ) : (
+                            <span className="text-yellow-400 font-semibold">
+                              ₹{p.price ?? "-"}
+                            </span>
+                          )}
                         </td>
-                        <td className="px-3 py-3 text-green-400 font-semibold">
-                          SOLD
+
+                        <td className="px-3 py-3 capitalize">
+                          {editingPlayer === p.id ? (
+                            <Select
+                              value={editTeam[p.id] || ""}
+                              onValueChange={(value) =>
+                                setEditTeam((prev) => ({
+                                  ...prev,
+                                  [p.id]: value,
+                                }))
+                              }
+                            >
+                              <SelectTrigger
+                                onClick={(e) => e.stopPropagation()}
+                                className="w-48 bg-[#071A2E] border-white/20"
+                              >
+                                <SelectValue placeholder="Select Team" />
+                              </SelectTrigger>
+
+                              <SelectContent className="bg-[#071A2E] border-white/20 text-white capitalize">
+                                {team.map((t) => (
+                                  <SelectItem key={t.id} value={t.id}>
+                                    {t.teamName}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <span className="font-medium">
+                              {team.find((t) => t.id === p.teamId)?.teamName ||
+                                "-"}
+                            </span>
+                          )}
+                        </td>
+
+                        <td className="px-3 py-3">
+                          <span className="text-green-400 font-semibold">
+                            SOLD
+                          </span>
+                        </td>
+
+                        <td className="px-3 py-3">
+                          {editingPlayer === p.id ? (
+                            <div
+                              className="flex gap-2"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Button
+                                size="sm"
+                                onClick={() => handleSaveEdit(p)}
+                                disabled={
+                                  !editTeam[p.id] ||
+                                  !editPrice[p.id] ||
+                                  assigning === p.id
+                                }
+                                className="bg-green-600 hover:bg-green-700"
+                              >
+                                {assigning === p.id ? "Saving..." : "Save"}
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="default"
+                                onClick={() => handleCancelEdit(p.id)}
+                                className="border-white/20"
+                              >
+                                Cancel
+                              </Button>
+                            </div>
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleStartEdit(p);
+                              }}
+                              className="hover:bg-white/10"
+                            >
+                              <Edit2 size={16} className="mr-1" />
+                              Edit
+                            </Button>
+                          )}
                         </td>
                       </>
                     )}
@@ -282,7 +426,6 @@ export default function AuctioneerDashboard({
         </div>
       </div>
 
-      {/* PLAYER DETAILS MODAL */}
       {selectedPlayer && (
         <PlayerDetailsModal
           player={selectedPlayer}
@@ -293,10 +436,6 @@ export default function AuctioneerDashboard({
     </>
   );
 }
-
-/* ---------------------------------- */
-/* Helpers */
-/* ---------------------------------- */
 
 function TabButton({
   active,

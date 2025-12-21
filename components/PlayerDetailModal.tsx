@@ -3,8 +3,19 @@
 import { useRef, useState } from "react";
 import type { Player } from "@/app/owner/OwnerDashboard";
 import { Button } from "./ui/button";
-import { updatePlayerPhoto, updatePlayerPhone } from "@/app/actions/players";
+import {
+  updatePlayerPhoto,
+  updatePlayerPhone,
+  updatePlayerRole,
+} from "@/app/actions/players";
 import toast from "react-hot-toast";
+
+const PLAYER_ROLES = [
+  { value: "batsman", label: "Batsman" },
+  { value: "bowler", label: "Bowler" },
+  { value: "all-rounder", label: "All-Rounder" },
+  { value: "wicket-keeper", label: "Wicket-Keeper" },
+];
 
 export function PlayerDetailsModal({
   player,
@@ -20,9 +31,13 @@ export function PlayerDetailsModal({
   const [uploading, setUploading] = useState(false);
   const [currentPhotoUrl, setCurrentPhotoUrl] = useState(player.photoUrl);
   const [currentPhone, setCurrentPhone] = useState(player.phone);
+  const [currentRole, setCurrentRole] = useState(player.role);
   const [isEditingPhone, setIsEditingPhone] = useState(false);
+  const [isEditingRole, setIsEditingRole] = useState(false);
   const [phoneInput, setPhoneInput] = useState(player.phone);
+  const [roleInput, setRoleInput] = useState(player.role);
   const [updatingPhone, setUpdatingPhone] = useState(false);
+  const [updatingRole, setUpdatingRole] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageClick = () => {
@@ -86,9 +101,43 @@ export function PlayerDetailsModal({
     }
   };
 
+  const handleRoleUpdate = async () => {
+    if (!roleInput) {
+      toast.error("Please select a role");
+      return;
+    }
+
+    try {
+      setUpdatingRole(true);
+
+      const result = await updatePlayerRole({
+        playerId: player.id,
+        role: roleInput,
+      });
+
+      if (result.success) {
+        setCurrentRole(result.role!);
+        setIsEditingRole(false);
+        toast.success("Role updated successfully!");
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to update role");
+    } finally {
+      setUpdatingRole(false);
+    }
+  };
+
   const handleCancelPhoneEdit = () => {
     setPhoneInput(currentPhone);
     setIsEditingPhone(false);
+  };
+
+  const handleCancelRoleEdit = () => {
+    setRoleInput(currentRole);
+    setIsEditingRole(false);
   };
 
   return (
@@ -205,15 +254,87 @@ export function PlayerDetailsModal({
                 <p className="text-xs text-center text-cyan-400/60 mt-2">
                   Click to update photo
                 </p>
+
+                {/* View Photo Button */}
+                {currentPhotoUrl && (
+                  <div className="flex justify-center">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setPreviewOpen(true);
+                      }}
+                      className="mt-2 text-xs text-purple-400 hover:text-purple-300 underline transition-colors"
+                    >
+                      View Photo
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div className="text-center">
                 <h2 className="text-2xl font-bold capitalize bg-linear-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
                   {player.name}
                 </h2>
-                <p className="text-sm text-cyan-400/80 font-medium mt-1 uppercase tracking-wide">
-                  {player.role}
-                </p>
+
+                {/* Role - Edit Mode or Display Mode */}
+                {isEditingRole ? (
+                  <div className="flex items-center justify-center gap-2 mt-2">
+                    <select
+                      title="role"
+                      value={roleInput}
+                      onChange={(e) => setRoleInput(e.target.value)}
+                      className="bg-white/10 text-white px-3 py-1.5 rounded-lg border border-cyan-500/30 focus:border-cyan-500 focus:outline-none text-sm capitalize"
+                    >
+                      {PLAYER_ROLES.map((role) => (
+                        <option
+                          key={role.value}
+                          value={role.value}
+                          className="bg-slate-800 text-white capitalize"
+                        >
+                          {role.label}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={handleRoleUpdate}
+                      disabled={updatingRole}
+                      className="bg-green-500 hover:bg-green-600 text-white px-2 py-1.5 rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
+                    >
+                      {updatingRole ? "..." : "✓"}
+                    </button>
+                    <button
+                      onClick={handleCancelRoleEdit}
+                      className="bg-red-500 hover:bg-red-600 text-white px-2 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center gap-2 mt-1">
+                    <p className="text-sm text-cyan-400/80 font-medium uppercase tracking-wide">
+                      {currentRole}
+                    </p>
+                    <button
+                      title="roleEdit"
+                      onClick={() => setIsEditingRole(true)}
+                      className="text-cyan-400 hover:text-cyan-300 text-xs"
+                    >
+                      <svg
+                        className="w-3.5 h-3.5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                )}
               </div>
 
               {isAuctionOver && (
@@ -250,7 +371,7 @@ export function PlayerDetailsModal({
                     </p>
 
                     {isEditingPhone ? (
-                      <div className="flex items-center gap-2 mt-1">
+                      <div className="flex items-center gap-1 mt-1">
                         <input
                           type="text"
                           maxLength={10}
@@ -389,7 +510,7 @@ export function PlayerDetailsModal({
           >
             <button
               onClick={() => setPreviewOpen(false)}
-              className="absolute -top-3 -right-3 bg-white/10 hover:bg-white/20 text-white rounded-full w-9 h-9 flex items-center justify-center"
+              className="absolute -top-3 -right-3 bg-white/10 hover:bg-white/20 text-white rounded-full w-9 h-9 flex items-center justify-center transition-all duration-200"
             >
               ✕
             </button>
