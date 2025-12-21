@@ -363,7 +363,7 @@ export async function getPlayersForAuction({
       where.teamId = { not: null };
     }
 
-    if (tab === "UNSOLD") {
+    if (tab === "ALL") {
       where.teamId = null;
     }
 
