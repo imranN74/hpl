@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentAccount } from "@/lib/auth";
 import OwnerDashboardClient from "./OwnerDashboard";
-import { getCurrentSeason } from "@/lib/seasons";
+import { getCurrentSeasonDetails } from "../actions/season";
 
 export default async function OwnerDashboardPage() {
   const account = await getCurrentAccount();
@@ -10,7 +10,7 @@ export default async function OwnerDashboardPage() {
     redirect("/login");
   }
 
-  const season = await getCurrentSeason();
+  const season = await getCurrentSeasonDetails();
 
   if (!season) {
     throw new Error("No active season found");
