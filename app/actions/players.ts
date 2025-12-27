@@ -125,6 +125,7 @@ export type GetPlayersResponse = {
     role: string;
     panchayat: string;
     teamId?: string | null;
+    fatherName: string;
   }[];
   isAuctionOver: boolean;
   noPlayersBought?: boolean;
@@ -189,6 +190,7 @@ export async function getPlayersForOwner({
           role: true,
           panchayat: true,
           teamId: true,
+          fatherName: true,
         },
       });
 
@@ -223,6 +225,7 @@ export async function getPlayersForOwner({
           role: true,
           panchayat: true,
           teamId: true,
+          fatherName: true,
         },
       });
 
@@ -248,6 +251,7 @@ export async function getPlayersForOwner({
           role: true,
           panchayat: true,
           teamId: true,
+          fatherName: true,
         },
       });
 
@@ -379,6 +383,7 @@ export async function getPlayersForAuction({
         teamId: true,
         role: true,
         price: true,
+        fatherName: true,
       },
     });
 

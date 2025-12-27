@@ -5,15 +5,7 @@ import { getCurrentAccount } from "@/lib/auth";
 
 export default async function Registration() {
   // 🔐 AUTH GUARD
-  const account = await getCurrentAccount();
-
-  if (
-    !account?.isLoggedIn ||
-    account.accountType !== "USER" ||
-    account.user?.role !== "AUCTIONEER"
-  ) {
-    redirect("/login"); // or "/unauthorized"
-  }
+  // const account = await getCurrentAccount();
 
   // ⏳ SEASON LOGIC
   const now = new Date();

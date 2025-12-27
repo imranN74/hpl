@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/navbar";
 import { Toaster } from "react-hot-toast";
 import { getCurrentAccount } from "@/lib/auth";
+import { getCurrentSeasonDetails } from "./actions/season";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,6 +28,7 @@ export default async function RootLayout({
 }>) {
   // ✅ SERVER: read JWT & build auth state
   const account = await getCurrentAccount();
+  const currentSeason = await getCurrentSeasonDetails();
 
   return (
     <html lang="en">
@@ -34,7 +36,7 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {/* ✅ pass account to client navbar */}
-        <Navbar account={account} />
+        <Navbar account={account} season={currentSeason} />
 
         <Toaster position="top-center" />
 

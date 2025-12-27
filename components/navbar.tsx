@@ -14,12 +14,20 @@ import {
   Users,
 } from "lucide-react";
 import { logoutAction } from "@/app/actions/login";
+import LogoutButton from "./LogoutButton";
 
-export default function Navbar(account: { account: any }) {
+export default function Navbar({
+  account,
+  season,
+}: {
+  account: any;
+  season: any;
+}) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [seasonOpen, setSeasonOpen] = useState(false);
 
   // console.log(account, "acccccc.....");
+  const isAuctionOver = new Date() > new Date(season?.auctionDate);
 
   return (
     <header className="fixed top-0 left-0 w-full z-50 bg-[#071A2E]/90 backdrop-blur border-b border-white/10 text-white">
@@ -34,14 +42,14 @@ export default function Navbar(account: { account: any }) {
 
         {/* DESKTOP MENU */}
         <ul className="hidden md:flex items-center gap-8 font-medium cursor-pointer">
-          {!account?.account?.isLoggedIn ? (
+          {!account?.isLoggedIn ? (
             ""
           ) : (
             <li>
               <Link href="/" className="hover:text-yellow-400 transition">
                 Hey,&nbsp;
                 <span className="capitalize text-yellow-400 font-bold">
-                  {account?.account?.owner?.ownerName.split(" ")[0]}
+                  {account?.owner?.ownerName.split(" ")[0]}
                 </span>
               </Link>
             </li>
@@ -55,10 +63,10 @@ export default function Navbar(account: { account: any }) {
 
           <li>
             <Link
-              href="/register"
-              className="text-green-500 font-bold hover:text-yellow-400 transition"
+              href={!isAuctionOver ? "/register" : "/register-soon"}
+              className="text-White  hover:text-yellow-400 transition"
             >
-              Register Now🔥
+              {!isAuctionOver ? "Register Now🔥" : "Registration"}
             </Link>
           </li>
 
@@ -74,14 +82,19 @@ export default function Navbar(account: { account: any }) {
             </Link>
           </li>
 
-          {!account?.account?.isLoggedIn ? (
-            ""
-          ) : (
+          {account?.isLoggedIn ? (
             <li>
-              <Link href="/owner" className="block hover:text-yellow-400">
+              <Link
+                href={
+                  account?.accountType === "OWNER" ? "/owner" : "/auctioneer"
+                }
+                className="block hover:text-yellow-400"
+              >
                 Players List
               </Link>
             </li>
+          ) : (
+            ""
           )}
 
           {/* SEASONS DROPDOWN */}
@@ -113,7 +126,7 @@ export default function Navbar(account: { account: any }) {
             )}
           </li> */}
           <li className=" hover:text-yellow-400">
-            {!account?.account?.isLoggedIn ? (
+            {!account?.isLoggedIn ? (
               <Link
                 href="/login"
                 className="hover:text-yellow-400 flex justify-center items-center gap-1"
@@ -148,7 +161,7 @@ export default function Navbar(account: { account: any }) {
       {mobileOpen && (
         <div className="md:hidden bg-[#071A2E] border-t border-white/10">
           <ul className="flex flex-col px-6 py-4 gap-4 font-medium">
-            {!account?.account?.isLoggedIn ? (
+            {!account?.isLoggedIn ? (
               ""
             ) : (
               <li>
@@ -159,7 +172,7 @@ export default function Navbar(account: { account: any }) {
                 >
                   Welcome,&nbsp;
                   <span className="capitalize text-yellow-400 font-bold">
-                    {account?.account?.owner?.ownerName.split(" ")[0]}
+                    {account?.owner?.ownerName.split(" ")[0]}
                   </span>
                 </Link>
               </li>
@@ -176,11 +189,11 @@ export default function Navbar(account: { account: any }) {
 
             <li>
               <Link
-                href="/register"
+                href={!isAuctionOver ? "/register" : "/register-soon"}
                 onClick={() => setMobileOpen(false)}
                 className="block text-green-500 font-bold hover:text-yellow-400"
               >
-                Register Now🔥
+                {!isAuctionOver ? "Register Now🔥" : "Registration"}
               </Link>
             </li>
 
@@ -203,12 +216,14 @@ export default function Navbar(account: { account: any }) {
               </Link>
             </li>
 
-            {!account?.account?.isLoggedIn ? (
+            {!account?.isLoggedIn ? (
               ""
             ) : (
               <li>
                 <Link
-                  href="/owner"
+                  href={
+                    account?.accountType === "OWNER" ? "/owner" : "/auctioneer"
+                  }
                   onClick={() => setMobileOpen(false)}
                   className="block hover:text-yellow-400"
                 >
@@ -247,26 +262,27 @@ export default function Navbar(account: { account: any }) {
               )}
             </li> */}
             <li className=" hover:text-yellow-400">
-              {!account?.account?.isLoggedIn ? (
+              {!account?.isLoggedIn ? (
                 <Link
                   href="/login"
-                  className="hover:text-yellow-400 flex justify-center items-center gap-1"
+                  className="hover:text-yellow-400 flex justify-center items-center gap-1 bg-yellow-700 p-2 rounded-md"
                   onClick={() => setMobileOpen(false)}
                 >
                   <LogIn color="#c7d22d" size={20} />
                   Login
                 </Link>
               ) : (
-                <form action={logoutAction}>
-                  <button
-                    type="submit"
-                    // onClick={() => setMobileOpen(false)}
-                    className="hover:text-red-400 transition cursor-pointer flex justify-center items-center gap-1"
-                  >
-                    Logout
-                    <LogOut color="#c7d22d" size={20} />
-                  </button>
-                </form>
+                // <form action={logoutAction}>
+                //   <button
+                //     type="submit"
+                //     // onClick={() => setMobileOpen(false)}
+                //     className="hover:text-red-400 transition cursor-pointer flex justify-center items-center gap-1"
+                //   >
+                //     Logout
+                //     <LogOut color="#c7d22d" size={20} />
+                //   </button>
+                // </form>
+                <LogoutButton setMobileOpen={setMobileOpen} />
               )}
             </li>
           </ul>

@@ -45,6 +45,8 @@ export function PlayerDetailsModal({
     fileInputRef.current?.click();
   };
 
+  // console.log(player, "pppppppppppp");
+
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -209,7 +211,7 @@ export function PlayerDetailsModal({
                   } group`}
                   onClick={handleImageClick}
                 >
-                  <div className="h-32 w-32 rounded-full border-4 border-gradient-to-r from-cyan-400 to-purple-400 overflow-hidden bg-gradient-to-br from-cyan-900/50 to-purple-900/50 flex items-center justify-center shadow-lg shadow-cyan-500/20 transition-transform duration-300 group-hover:scale-105">
+                  <div className="h-32 w-32 rounded-full border-4 border-gradient-to-r from-cyan-400 to-purple-400 overflow-hidden bg-linear-to-br from-cyan-900/50 to-purple-900/50 flex items-center justify-center shadow-lg shadow-cyan-500/20 transition-transform duration-300 group-hover:scale-105">
                     {currentPhotoUrl ? (
                       <img
                         src={currentPhotoUrl}
@@ -275,6 +277,9 @@ export function PlayerDetailsModal({
                 <h2 className="text-2xl font-bold capitalize bg-linear-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
                   {player.name}
                 </h2>
+                <h2 className="text-lg  capitalize text-blue-300">
+                  Father : {player.fatherName}
+                </h2>
 
                 {/* Role - Edit Mode or Display Mode */}
                 {isEditingRole ? (
@@ -283,7 +288,7 @@ export function PlayerDetailsModal({
                       title="role"
                       value={roleInput}
                       onChange={(e) => setRoleInput(e.target.value)}
-                      className="bg-white/10 text-white px-3 py-1.5 rounded-lg border border-cyan-500/30 focus:border-cyan-500 focus:outline-none text-sm capitalize"
+                      className="bg-white/10 text-white px-3 py-1 rounded-lg border border-cyan-500/30 focus:border-cyan-500 focus:outline-none text-sm capitalize"
                     >
                       {PLAYER_ROLES.map((role) => (
                         <option
@@ -336,12 +341,6 @@ export function PlayerDetailsModal({
                   </div>
                 )}
               </div>
-
-              {isAuctionOver && (
-                <span className="border px-3 py-1 rounded-xl bg-yellow-600 text-sm font-semibold">
-                  {player.teamId ? "Sold" : "Unsold"}
-                </span>
-              )}
             </div>
 
             {/* DETAILS */}

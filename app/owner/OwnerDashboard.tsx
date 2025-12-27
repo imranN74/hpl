@@ -15,6 +15,7 @@ export type Player = {
   panchayat: string;
   photoUrl?: string | null;
   teamId?: string | null;
+  fatherName: string;
 };
 
 type TabType = "ALL" | "UNSOLD" | "YOUR";
@@ -133,7 +134,7 @@ export default function OwnerDashboardClient({
           <table className="min-w-full text-sm">
             <thead className="bg-[#0b2c4d] text-yellow-400">
               <tr>
-                <th className="px-2 py-3 text-left">Sn.</th>
+                <th className="px-2 py-3 text-left">#</th>
                 <th className="px-4 py-3 text-left">Name</th>
                 <th className="px-4 py-3 text-left">Phone</th>
 

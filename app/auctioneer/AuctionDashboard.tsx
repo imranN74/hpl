@@ -27,6 +27,7 @@ type Player = {
   photoUrl?: string | null;
   teamId?: string | null;
   price?: number | null;
+  fatherName: string;
 };
 
 type TabType = "ALL" | "SOLD";
