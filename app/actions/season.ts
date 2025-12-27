@@ -7,6 +7,6 @@ export async function getCurrentSeasonDetails() {
       seasonNumber: "desc",
     },
   });
-  console.log(currentSeason);
+  // console.log(currentSeason);
   return currentSeason;
 }

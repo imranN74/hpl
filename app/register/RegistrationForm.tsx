@@ -24,7 +24,7 @@ export default function PlayerRegistrationPage(seasonData: any) {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  console.log(seasonData);
+  // console.log(seasonData);
 
   // State for Select components
   const [role, setRole] = useState("");
